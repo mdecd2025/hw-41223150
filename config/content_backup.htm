@@ -18,7 +18,23 @@
 <h2>W1</h2>
 <h2>W2</h2>
 <h2>W3</h2>
-<h2>W5</h2>
+<p><span>將本班未納入分組名單的名單</span></p>
+<pre class="brush:html;auto-links:false;toolbar:false" contenteditable="false"># 甲班學員資料處理
+url = "https://mde.tw/list/2a.txt"
+data = open(url).readlines()
+all_stud = data[1:]
+a_all_members = ['41223154', '41271125', '41271158', '41271146', '41271131', 'CYG41223103', '41223102', '41023128', '41023137', '41223137', '41223157', '41223156', 'otakuyoyo', '41223141', '41223113', 'kim41223114', 'joeisme1208', '41223116', '41223144', '41223140', '41223143', '41223138', '41223134', '41223136', 'zhe41223118', 'Spirit0224', 'yuhao-08', '41223158', 'Ren911308', '41223150', 'Manto8', 'CYA41223106', 'yan21ed', 'Lin41223107', '41223133', 'hong41223129', '41223110', '41223147', 'Linjiahong41223125', 'CHN41223132', 'Yu-Fang-Hong', '41023111', 'yckaooooo', 'kolas911205', '41023105', '40932134', '41223104', 'yan41223101', '41223105', '41223153', '41223120', '41223152', 'G8People', 'WSE41223112', '41223146', '41223119']
+   
+# 顯示甲班標題
+print("甲班:")
+for i in all_stud:
+    drop_n = i.rstrip("\n")
+    stud = drop_n.split("\t")
+    stud_num = stud[0]
+    stud_github = stud[1]
+    if stud_github not in a_all_members:
+        print(stud_num)</pre>
+<p><span></span></p><h2>W5</h2>
 <p><span style="background-color: #ffff00;">整理完的英文單字與文法</span></p>
 <p>1. **Webots 是什麼？** <br/> Webots 是一個由 Cyberbotics Ltd. 開發的免費、open-source 的 3D robot simulator。它被用於工業、教育和研究中，用來 model、program 和 simulate robots。</p>
 <p>2. **我可以用 Webots 做什麼？** <br/> 你可以 design 和 simulate robots（例如輪式、腿式或飛行式 robots），用 C、C++、Python 或 Java 等語言 program 它們的行為，測試 sensors 和 actuators，甚至將 programs 轉移到真實 robots 上。</p>
