@@ -501,7 +501,90 @@ while robot.step(timestep) != -1:
                 raise_start_time = None</pre>
 <p><span style="background-color: #ff0000;">籃框隨機移動和感測器角度調整:</span><br/><br/></p>
 <p><iframe allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen="allowfullscreen" frameborder="0" height="315" referrerpolicy="strict-origin-when-cross-origin" src="https://www.youtube.com/embed/ABK-A6Oft1g?si=NR9_UI1tlxq6D8e5" title="YouTube video player" width="560"></iframe></p>
-<p></p><h1>Brython</h1>
+<pre class="brush:py;auto-links:false;toolbar:false" contenteditable="false">from controller import Robot
+import random
+ 
+# === 常數 ===
+MAX_VELOCITY = 10.0
+MOVE_DURATION = 1.5
+DISTANCE_THRESHOLD = 0.17
+SCORE_INTERVAL = 1.0  # 避免連續得分
+ 
+# === 初始化 ===
+robot = Robot()
+timestep = int(robot.getBasicTimeStep())
+emitter = robot.getDevice("score_emitter")
+score_to_send = 2
+sensor = robot.getDevice('sensor')
+sensor.enable(timestep)
+ 
+# === 馬達 ===
+wheels = [robot.getDevice(f"wheel{i}") for i in range(5, 9)]
+for w in wheels:
+    w.setPosition(float('inf'))
+    w.setVelocity(0)
+ 
+def set_wheel_velocity(v1, v2, v3, v4):
+    wheels[0].setVelocity(v1)
+    wheels[1].setVelocity(v2)
+    wheels[2].setVelocity(v3)
+    wheels[3].setVelocity(v4)
+ 
+# === AD轉距離對照表 ===
+lookup_table = [
+    (1000, 0.00), (620, 0.12), (372, 0.13),
+    (248, 0.14), (186, 0.15), (0, 0.18)
+]
+ 
+def ad_to_distance(ad_value):
+    for i in range(len(lookup_table) - 1):
+        a0, d0 = lookup_table[i]
+        a1, d1 = lookup_table[i + 1]
+        if a1 &lt;= ad_value &lt;= a0:
+            return d0 + (d1 - d0) * (ad_value - a0) / (a1 - a0)
+    return lookup_table[0][1] if ad_value &gt; lookup_table[0][0] else lookup_table[-1][1]
+ 
+# === 狀態 ===
+score = 0
+last_score_time = 0
+is_moving = False
+move_timer = 0
+current_velocity = (0, 0, 0, 0)
+last_time = robot.getTime()
+ 
+print("⚙️ 初始靜止：當感測器感應到球時得分，然後才啟動隨機移動")
+ 
+# === 主迴圈 ===
+while robot.step(timestep) != -1:
+    now = robot.getTime()
+    dt = now - last_time
+    last_time = now
+ 
+    sensor_value = sensor.getValue()
+    distance = ad_to_distance(sensor_value)
+ 
+    if is_moving:
+        set_wheel_velocity(*current_velocity)
+        move_timer -= dt
+        if move_timer &lt;= 0:
+            # 移動時間結束，停止
+            is_moving = False
+            set_wheel_velocity(0, 0, 0, 0)
+    else:
+        set_wheel_velocity(0, 0, 0, 0)
+        if distance &lt; DISTANCE_THRESHOLD and (now - last_score_time) &gt; SCORE_INTERVAL:
+            # 得分並開始移動
+            score += score_to_send
+            print(f"🎯 得分！距離 {distance:.3f} m，總分：{score}")
+            emitter.send(str(score_to_send).encode('utf-8'))
+            last_score_time = now
+ 
+            # 啟動隨機移動
+            def rv(): return random.uniform(-MAX_VELOCITY, MAX_VELOCITY)
+            current_velocity = (rv(), rv(), rv(), rv())
+            move_timer = MOVE_DURATION
+            is_moving = True</pre>
+<p><br/><br/></p><h1>Brython</h1>
 <p><button id="add1to100">1 add to 100</button></p>
 <!-- 導入 brython 程式庫 -->
 <p>
